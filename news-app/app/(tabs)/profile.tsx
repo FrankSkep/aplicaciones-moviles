@@ -4,11 +4,11 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Fonts } from "@/constants/theme";
 import React from "react";
 import {
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    TouchableOpacity,
-    View,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function ProfileScreen() {
@@ -35,7 +35,7 @@ export default function ProfileScreen() {
           <View style={styles.infoRow}>
             <IconSymbol name="envelope.fill" size={20} color="#666" />
             <ThemedText style={styles.infoText}>
-              frank.example@uabc.edu.mx
+              frankskep@uabc.edu.mx
             </ThemedText>
           </View>
 
@@ -118,9 +118,8 @@ const styles = StyleSheet.create({
     color: "#444",
   },
   logoutButton: {
-    marginTop: "auto",
     marginHorizontal: 20,
-    marginTop: 40,
+    marginTop: 50,
     padding: 18,
     borderRadius: 15,
     backgroundColor: "#fee2e2",
