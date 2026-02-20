@@ -1,4 +1,6 @@
-import { DefaultTheme, NavigationContainer, NavigatorScreenParams } from "@react-navigation/native";
+import { DefaultTheme, DrawerActions, LinkingOptions, NavigationContainer, NavigatorScreenParams } from "@react-navigation/native";
+import { TouchableOpacity } from "react-native";
+import * as ExpoLinking from "expo-linking";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createDrawerNavigator } from "@react-navigation/drawer";
@@ -81,15 +83,50 @@ function HomeTabsNavigator() {
 function MainStackNavigator() {
     return (
         <Stack.Navigator>
-          <Stack.Screen name="HomeTabs" component={HomeTabsNavigator}/>
+          <Stack.Screen
+            name="HomeTabs"
+            component={HomeTabsNavigator}
+            options={({ navigation }) => ({
+              title: "Mi App",
+              headerLeft: () => (
+                <TouchableOpacity
+                  onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+                  style={{ marginRight: 12 }}
+                >
+                  <AntDesign name="bars" size={24} color="#0f766e" />
+                </TouchableOpacity>
+              ),
+            })}
+          />
         </Stack.Navigator>
     );
 }
 
+const linking: LinkingOptions<RootDrawerParamList> = {
+  prefixes: [ExpoLinking.createURL("/"), "myapp://"],
+  config: {
+    screens: {
+      Inicio: {
+        screens: {
+          HomeTabs: {
+            screens: {
+              Home: "home",
+              Profile: "profile",
+              Settings: "settings",
+              Details: "details/:from?",
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
+console.log(ExpoLinking.createURL("profile"));
 
 export default function App() {
     return (
-      <NavigationContainer theme={{
+      <NavigationContainer linking={linking} theme={{
         ...DefaultTheme,
         colors: {
           ...DefaultTheme.colors,
