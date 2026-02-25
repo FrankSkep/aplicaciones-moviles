@@ -89,7 +89,7 @@ export default function FormActivity() {
             autoCorrect={false}
             returnKeyType="next"
             onSubmitEditing={() => emailRef.current?.focus()}
-            blurOnSubmit={false} // No cerrar teclado al avanzar
+            submitBehavior="submit" // No cerrar teclado al avanzar
           />
 
           {/* EMAIL */}
@@ -107,7 +107,7 @@ export default function FormActivity() {
             autoComplete="email"
             returnKeyType="next"
             onSubmitEditing={() => passwordRef.current?.focus()}
-            blurOnSubmit={false}
+            submitBehavior="submit"
           />
 
           {/* CONTRASEÑA */}
@@ -124,7 +124,7 @@ export default function FormActivity() {
             autoCapitalize="none"
             returnKeyType="next"
             onSubmitEditing={() => telefonoRef.current?.focus()}
-            blurOnSubmit={false}
+            submitBehavior="submit"
           />
 
           {/* TELÉFONO — Extra 1: keyboardType phone-pad + validación 10 dígitos */}
@@ -141,7 +141,7 @@ export default function FormActivity() {
             autoCorrect={false}
             returnKeyType="next"
             onSubmitEditing={() => edadRef.current?.focus()}
-            blurOnSubmit={false}
+            submitBehavior="submit"
           />
           {telefonoError ? (
             <Text style={styles.errorText}>{telefonoError}</Text>
@@ -162,7 +162,7 @@ export default function FormActivity() {
             maxLength={2}
             returnKeyType="done"
             onSubmitEditing={handleSubmit}
-            blurOnSubmit={true} // Al terminar el último campo, sí cerrar teclado
+            submitBehavior="blurAndSubmit" // Al terminar el último campo, sí cerrar teclado
           />
           {edadError ? (
             <Text style={styles.errorText}>{edadError}</Text>
