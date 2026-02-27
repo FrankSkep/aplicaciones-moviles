@@ -1,244 +1,442 @@
-import React, { useState, useRef } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-  TouchableWithoutFeedback,
-  Keyboard,
-  Alert,
-} from "react-native";
+import { useRef, useState } from "react";
+import { StyleSheet, Text, View, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform, ScrollView, Modal, Pressable } from "react-native";
+import { TextInput } from "react-native-gesture-handler";
+
+type FormData = {
+    name: string;
+    email: string;
+    phone: string;
+    password: string;
+    confirmPassword: string;
+};
+
+type FormErrors = Partial<Record<keyof FormData, string>>;
 
 export default function FormActivity() {
-  const [nombre, setNombre] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [telefono, setTelefono] = useState("");
-  const [edad, setEdad] = useState("");
+    const [formData, setFormData] = useState<FormData>({
+        name: "",
+        email: "",
+        phone: "",
+        password: "",
+        confirmPassword: "",
+    });
+    const [errors, setErrors] = useState<FormErrors>({});
+    const [touched, setTouched] = useState<Record<keyof FormData, boolean>>({
+        name: false,
+        email: false,
+        phone: false,
+        password: false,
+        confirmPassword: false,
+    });
+    const [generalError, setGeneralError] = useState("");
+    const [showSummary, setShowSummary] = useState(false);
 
-  // Errores de validación
-  const [telefonoError, setTelefonoError] = useState("");
-  const [edadError, setEdadError] = useState("");
+    // focus referencias
+    const nameInputRef = useRef<TextInput>(null);
+    const emailInputRef = useRef<TextInput>(null);
+    const phoneInputRef = useRef<TextInput>(null);
+    const passwordInputRef = useRef<TextInput>(null);
+    const confirmPasswordInputRef = useRef<TextInput>(null);
 
-  // Refs para focus encadenado
-  const emailRef = useRef<TextInput>(null);
-  const passwordRef = useRef<TextInput>(null);
-  const telefonoRef = useRef<TextInput>(null);
-  const edadRef = useRef<TextInput>(null);
+    const formatPhone = (value: string) => {
+        const digits = value.replace(/\D/g, "").slice(0, 10);
+        if (digits.length <= 3) {
+            return digits ? `(${digits}` : "";
+        }
+        return `(${digits.slice(0, 3)})${digits.slice(3)}`;
+    };
 
-  // Validación de teléfono: mínimo 10 dígitos
-  const handleTelefonoChange = (value: string) => {
-    // Solo permitir dígitos
-    const soloDigitos = value.replace(/\D/g, "");
-    setTelefono(soloDigitos);
-    if (soloDigitos.length > 0 && soloDigitos.length < 10) {
-      setTelefonoError("El teléfono debe tener al menos 10 dígitos");
-    } else {
-      setTelefonoError("");
-    }
-  };
+    const getPhoneDigits = (value: string) => value.replace(/\D/g, "");
 
-  // Validación de edad: máximo 2 dígitos
-  const handleEdadChange = (value: string) => {
-    const soloDigitos = value.replace(/\D/g, "");
-    if (soloDigitos.length <= 2) {
-      setEdad(soloDigitos);
-      setEdadError("");
-    } else {
-      setEdadError("La edad no puede tener más de 2 dígitos");
-    }
-  };
+    const getErrors = (data: FormData): FormErrors => {
+        const nextErrors: FormErrors = {};
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[A-Za-z]{2,}$/;
 
-  const handleSubmit = () => {
-    let valido = true;
+        if (!data.name.trim()) {
+            nextErrors.name = "El nombre es requerido";
+        } else if (data.name.trim().length < 3) {
+            nextErrors.name = "Mínimo 3 caracteres";
+        }
 
-    if (telefono.length > 0 && telefono.length < 10) {
-      setTelefonoError("El teléfono debe tener al menos 10 dígitos");
-      valido = false;
-    }
+        if (!data.email.trim()) {
+            nextErrors.email = "El email es requerido";
+        } else if (/^[A-Z]/.test(data.email)) {
+            nextErrors.email = "El email no debe iniciar con mayúscula";
+        } else if (!emailRegex.test(data.email) || !data.email.includes(".com")) {
+            nextErrors.email = "Email inválido (debe contener .com)";
+        }
 
-    if (!valido) {
-      Alert.alert("Error", "Por favor corrige los errores antes de enviar.");
-      return;
-    }
+        const phoneDigits = getPhoneDigits(data.phone);
+        if (!phoneDigits) {
+            nextErrors.phone = "El teléfono es requerido";
+        } else if (!/^\d{10}$/.test(phoneDigits)) {
+            nextErrors.phone = "Debe tener 10 números";
+        }
 
-    Alert.alert("Formulario enviado", `Nombre: ${nombre}\nEmail: ${email}`);
-  };
+        if (!data.password) {
+            nextErrors.password = "La contraseña es requerida";
+        } else if (data.password.length < 6) {
+            nextErrors.password = "Mínimo 6 caracteres";
+        } else if (!/[A-Z]/.test(data.password)) {
+            nextErrors.password = "Debe contener al menos una mayúscula";
+        }
 
-  return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.flex}
-    >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.container}>
-          <Text style={styles.titulo}>Registro</Text>
+        if (!data.confirmPassword) {
+            nextErrors.confirmPassword = "Confirma la contraseña";
+        } else if (data.password !== data.confirmPassword) {
+            nextErrors.confirmPassword = "Las contraseñas no coinciden";
+        }
 
-          {/* NOMBRE */}
-          <Text style={styles.label}>Nombre</Text>
-          <TextInput
-            style={styles.input}
-            value={nombre}
-            onChangeText={setNombre}
-            placeholder="Tu nombre completo"
-            placeholderTextColor="#aaa"
-            autoCapitalize="words"
-            autoCorrect={false}
-            returnKeyType="next"
-            onSubmitEditing={() => emailRef.current?.focus()}
-            submitBehavior="submit" // No cerrar teclado al avanzar
-          />
+        return nextErrors;
+    };
 
-          {/* EMAIL */}
-          <Text style={styles.label}>Email</Text>
-          <TextInput
-            ref={emailRef}
-            style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-            placeholder="correo@ejemplo.com"
-            placeholderTextColor="#aaa"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoCorrect={false}
-            autoComplete="email"
-            returnKeyType="next"
-            onSubmitEditing={() => passwordRef.current?.focus()}
-            submitBehavior="submit"
-          />
+    const handleChange = (field: keyof FormData) => (value: string) => {
+        const nextValue = field === "phone" ? formatPhone(value) : value;
+        setFormData((prev) => ({ ...prev, [field]: nextValue }));
+        if (errors[field]) {
+            setErrors((prev) => ({ ...prev, [field]: undefined }));
+        }
+        if (generalError) {
+            setGeneralError("");
+        }
+    };
 
-          {/* CONTRASEÑA */}
-          <Text style={styles.label}>Contraseña</Text>
-          <TextInput
-            ref={passwordRef}
-            style={styles.input}
-            value={password}
-            onChangeText={setPassword}
-            placeholder="Mínimo 8 caracteres"
-            placeholderTextColor="#aaa"
-            secureTextEntry
-            autoComplete="password"
-            autoCapitalize="none"
-            returnKeyType="next"
-            onSubmitEditing={() => telefonoRef.current?.focus()}
-            submitBehavior="submit"
-          />
+    const handleBlur = (field: keyof FormData) => () => {
+        setTouched((prev) => ({ ...prev, [field]: true }));
+        const nextErrors = getErrors(formData);
+        if (nextErrors[field]) {
+            setErrors((prev) => ({ ...prev, [field]: nextErrors[field] }));
+        }
+    };
 
-          {/* TELÉFONO — Extra 1: keyboardType phone-pad + validación 10 dígitos */}
-          <Text style={styles.label}>Teléfono</Text>
-          <TextInput
-            ref={telefonoRef}
-            style={[styles.input, telefonoError ? styles.inputError : null]}
-            value={telefono}
-            onChangeText={handleTelefonoChange}
-            placeholder="10 dígitos mínimo"
-            placeholderTextColor="#aaa"
-            keyboardType="phone-pad"
-            autoCapitalize="none"
-            autoCorrect={false}
-            returnKeyType="next"
-            onSubmitEditing={() => edadRef.current?.focus()}
-            submitBehavior="submit"
-          />
-          {telefonoError ? (
-            <Text style={styles.errorText}>{telefonoError}</Text>
-          ) : null}
+    const focusFirstError = (nextErrors: FormErrors) => {
+        if (nextErrors.name) {
+            nameInputRef.current?.focus();
+            return;
+        }
+        if (nextErrors.email) {
+            emailInputRef.current?.focus();
+            return;
+        }
+        if (nextErrors.phone) {
+            phoneInputRef.current?.focus();
+            return;
+        }
+        if (nextErrors.password) {
+            passwordInputRef.current?.focus();
+            return;
+        }
+        if (nextErrors.confirmPassword) {
+            confirmPasswordInputRef.current?.focus();
+        }
+    };
 
-          {/* EDAD — Extra 3: keyboardType numeric + límite 2 dígitos */}
-          <Text style={styles.label}>Edad</Text>
-          <TextInput
-            ref={edadRef}
-            style={[styles.input, edadError ? styles.inputError : null]}
-            value={edad}
-            onChangeText={handleEdadChange}
-            placeholder="Ej: 25"
-            placeholderTextColor="#aaa"
-            keyboardType="numeric"
-            autoCapitalize="none"
-            autoCorrect={false}
-            maxLength={2}
-            returnKeyType="done"
-            onSubmitEditing={handleSubmit}
-            submitBehavior="blurAndSubmit" // Al terminar el último campo, sí cerrar teclado
-          />
-          {edadError ? (
-            <Text style={styles.errorText}>{edadError}</Text>
-          ) : null}
+    const handleSubmit = () => {
+        const nextErrors = getErrors(formData);
+        const missingRequired =
+            !formData.name.trim() ||
+            !formData.email.trim() ||
+            !formData.phone.trim() ||
+            !formData.password ||
+            !formData.confirmPassword;
 
-          {/* BOTÓN ENVIAR */}
-          <TouchableOpacity style={styles.boton} onPress={handleSubmit}>
-            <Text style={styles.botonTexto}>Enviar Registro</Text>
-          </TouchableOpacity>
-        </View>
-      </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
-  );
+        if (missingRequired) {
+            setGeneralError("Faltan campos obligatorios");
+        }
+
+        if (Object.keys(nextErrors).length > 0) {
+            setErrors(nextErrors);
+            setTouched({
+                name: true,
+                email: true,
+                phone: true,
+                password: true,
+                confirmPassword: true,
+            });
+            focusFirstError(nextErrors);
+            return;
+        }
+
+        setShowSummary(true);
+    };
+
+
+    return (
+        <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            keyboardVerticalOffset={120}
+            style={styles.container}
+        >
+            <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+                <ScrollView
+                    keyboardShouldPersistTaps="handled"
+                    contentContainerStyle={styles.scrollContent}
+                >
+                    <Text style={{ fontSize: 20, fontWeight: "bold", alignItems: "center", marginTop: 20 }}>Práctica 17</Text>
+                    {/* descipcion de la actividad */}
+                    <Text style={{ fontSize: 14, opacity: 0.7, alignItems: "center", marginBottom: 20 }}>
+                        Crea un formulario de registro con validaciones y manejo de errores.
+                        - El formulario debe incluir campos para nombre, email, teléfono, contraseña y confirmación de contraseña.
+                        - Implementa validaciones para cada campo (ej. email válido, contraseña con mayúscula, etc.).
+                        - Muestra mensajes de error específicos debajo de cada campo cuando la validación falle.
+                    </Text>
+                    <View style={styles.container}>
+                        {generalError ? <Text style={styles.generalError}>{generalError}</Text> : null}
+                        <Text style={styles.title}>Name</Text>
+                        <TextInput
+                            ref={nameInputRef}
+                            value={formData.name}
+                            onChangeText={handleChange("name")}
+                            placeholder="Enter your name"
+                            style={[styles.Input, touched.name && errors.name ? styles.inputError : null]}
+                            onBlur={handleBlur("name")}
+                            onSubmitEditing={() => emailInputRef.current?.focus()}
+                            submitBehavior="submit"
+                        />
+                        {touched.name && errors.name ? (
+                            <Text style={styles.errorText}>{errors.name}</Text>
+                        ) : null}
+                        <Text style={styles.title}>Email</Text>
+                        <TextInput
+                            ref={emailInputRef}
+                            keyboardType="email-address"
+                            value={formData.email}
+                            onChangeText={handleChange("email")}
+                            placeholder="Enter your email"
+                            style={[styles.Input, touched.email && errors.email ? styles.inputError : null]}
+                            autoCapitalize="none"
+                            autoCorrect={false}
+                            onBlur={handleBlur("email")}
+                            onSubmitEditing={() => phoneInputRef.current?.focus()}
+                            submitBehavior="submit"
+
+                        />
+                        {touched.email && errors.email ? (
+                            <Text style={styles.errorText}>{errors.email}</Text>
+                        ) : null}
+                        <Text style={styles.title}>Phone</Text>
+                        <TextInput
+                            ref={phoneInputRef}
+                            keyboardType="phone-pad"
+                            value={formData.phone}
+                            onChangeText={handleChange("phone")}
+                            placeholder="Enter your phone"
+                            style={[styles.Input, touched.phone && errors.phone ? styles.inputError : null]}
+                            onBlur={handleBlur("phone")}
+                            onSubmitEditing={() => passwordInputRef.current?.focus()}
+                            submitBehavior="submit"
+                            maxLength={12}
+                        />
+                        {touched.phone && errors.phone ? (
+                            <Text style={styles.errorText}>{errors.phone}</Text>
+                        ) : null}
+                        <Text style={styles.title}>Password</Text>
+                        <TextInput
+                            ref={passwordInputRef}
+                            value={formData.password}
+                            onChangeText={handleChange("password")}
+                            placeholder="Enter your password"
+                            secureTextEntry={true}
+                            style={[styles.Input, touched.password && errors.password ? styles.inputError : null]}
+                            onBlur={handleBlur("password")}
+                            onSubmitEditing={() => confirmPasswordInputRef.current?.focus()}
+                            submitBehavior="submit"
+                        />
+                        {touched.password && errors.password ? (
+                            <Text style={styles.errorText}>{errors.password}</Text>
+                        ) : null}
+                        <Text style={styles.title}>Confirm Password</Text>
+                        <TextInput
+                            ref={confirmPasswordInputRef}
+                            value={formData.confirmPassword}
+                            onChangeText={handleChange("confirmPassword")}
+                            placeholder="Confirm your password"
+                            secureTextEntry={true}
+                            style={[styles.Input, touched.confirmPassword && errors.confirmPassword ? styles.inputError : null]}
+                            onBlur={handleBlur("confirmPassword")}
+                            onSubmitEditing={() => {
+                                handleSubmit();
+                            }}
+                            submitBehavior="submit"
+                        />
+                        {touched.confirmPassword && errors.confirmPassword ? (
+                            <Text style={styles.errorText}>{errors.confirmPassword}</Text>
+                        ) : null}
+                        <Pressable
+                            style={({ pressed }) => [
+                                styles.modalButton,
+                                { marginTop: 24, opacity: pressed ? 0.7 : 1 }
+                            ]}
+                            onPress={handleSubmit}
+                        >
+                            <Text style={styles.modalButtonText}>Submit</Text>
+                        </Pressable>
+                    </View>
+                    <Modal
+                        visible={showSummary}
+                        transparent
+                        animationType="fade"
+                        onRequestClose={() => setShowSummary(false)}
+                    >
+                        <View style={styles.modalBackdrop}>
+                            <View style={styles.modalCard}>
+                                <Text style={styles.modalTitle}>Info</Text>
+                                <View style={styles.modalRow}>
+                                    <Text style={styles.modalLabel}>Nombre</Text>
+                                    <Text style={styles.modalValue}>{formData.name}</Text>
+                                </View>
+                                <View style={styles.modalRow}>
+                                    <Text style={styles.modalLabel}>Email</Text>
+                                    <Text style={styles.modalValue}>{formData.email}</Text>
+                                </View>
+                                <View style={styles.modalRow}>
+                                    <Text style={styles.modalLabel}>Telefono</Text>
+                                    <Text style={styles.modalValue}>{formData.phone}</Text>
+                                </View>
+                                <View style={styles.modalRow}>
+                                    <Text style={styles.modalLabel}>Contraseña</Text>
+                                    <Text style={styles.modalValue}>{formData.password}</Text>
+                                </View>
+                                <Pressable
+                                    style={({ pressed }) => [
+                                        styles.modalButton,
+                                        { opacity: pressed ? 0.7 : 1 }
+                                    ]}
+                                    onPress={() => setShowSummary(false)}
+                                >
+                                    <Text style={styles.modalButtonText}>Cerrar</Text>
+                                </Pressable>
+                            </View>
+                        </View>
+                    </Modal>
+                </ScrollView>
+            </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
+    );
 }
 
+
 const styles = StyleSheet.create({
-  flex: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-  },
-  container: {
-    flex: 1,
-    padding: 24,
-    justifyContent: "center",
-  },
-  titulo: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: "#1a1a2e",
-    marginBottom: 24,
-    textAlign: "center",
-    letterSpacing: 1,
-  },
-  label: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#555",
-    marginBottom: 4,
-    marginLeft: 2,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  input: {
-    height: 50,
-    backgroundColor: "#fff",
-    borderWidth: 1.5,
-    borderColor: "#ddd",
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    fontSize: 16,
-    color: "#1a1a2e",
-    marginBottom: 14,
-  },
-  inputError: {
-    borderColor: "#e74c3c",
-    backgroundColor: "#fff5f5",
-  },
-  errorText: {
-    color: "#e74c3c",
-    fontSize: 12,
-    marginTop: -10,
-    marginBottom: 10,
-    marginLeft: 4,
-  },
-  boton: {
-    backgroundColor: "#1a1a2e",
-    height: 52,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 8,
-  },
-  botonTexto: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
-    letterSpacing: 0.5,
-  },
+    container: {
+        flex: 1,
+        backgroundColor: "#f4f7ff",
+        justifyContent: "center",
+        paddingHorizontal: 20,
+    },
+    scrollContent: {
+        flexGrow: 1,
+        justifyContent: "center",
+        paddingVertical: 30,
+    },
+    card: {
+        backgroundColor: "#ffffff",
+        borderRadius: 18,
+        paddingHorizontal: 20,
+        paddingVertical: 24,
+        shadowColor: "#1d2a57",
+        shadowOpacity: 0.15,
+        shadowRadius: 12,
+        shadowOffset: { width: 0, height: 6 },
+        elevation: 4,
+    },
+    heading: {
+        fontSize: 24,
+        fontWeight: "800",
+        color: "#1d2a57",
+    },
+    subheading: {
+        fontSize: 14,
+        color: "#5b6aa5",
+        marginTop: 6,
+        marginBottom: 10,
+    },
+    Input: {
+        borderWidth: 1,
+        borderColor: "#d8deef",
+        backgroundColor: "#f7f9ff",
+        textAlign: "left",
+        paddingHorizontal: 12,
+        paddingVertical: 12,
+        width: "100%",
+        marginTop: 8,
+        borderRadius: 12,
+        color: "#1f2a44",
+    },
+    inputError: {
+        borderColor: "#ff3b30",
+        backgroundColor: "#fff2f2",
+    },
+    errorText: {
+        color: "#ff3b30",
+        fontSize: 12,
+        marginTop: 4,
+        marginLeft: 2,
+    },
+    generalError: {
+        color: "#ff3b30",
+        fontSize: 13,
+        fontWeight: "600",
+        marginTop: 10,
+    },
+    title: {
+        fontSize: 13,
+        fontWeight: "700",
+        color: "#3b4a7a",
+        textAlign: "left",
+        width: "100%",
+        marginTop: 16,
+    },
+    modalBackdrop: {
+        flex: 1,
+        backgroundColor: "rgba(10, 20, 60, 0.35)",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: 20,
+    },
+    modalCard: {
+        width: "100%",
+        backgroundColor: "#ffffff",
+        borderRadius: 18,
+        padding: 20,
+        shadowColor: "#1d2a57",
+        shadowOpacity: 0.2,
+        shadowRadius: 16,
+        shadowOffset: { width: 0, height: 8 },
+        elevation: 6,
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: "800",
+        color: "#1d2a57",
+        marginBottom: 12,
+    },
+    modalRow: {
+        paddingVertical: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: "#edf0fb",
+    },
+    modalLabel: {
+        fontSize: 12,
+        color: "#5b6aa5",
+        textTransform: "uppercase",
+        letterSpacing: 0.5,
+    },
+    modalValue: {
+        fontSize: 15,
+        fontWeight: "600",
+        color: "#1f2a44",
+        marginTop: 4,
+    },
+    modalButton: {
+        marginTop: 16,
+        backgroundColor: "#3b4a7a",
+        paddingVertical: 12,
+        borderRadius: 12,
+        alignItems: "center",
+    },
+    modalButtonText: {
+        color: "#ffffff",
+        fontWeight: "700",
+        fontSize: 14,
+    },
 });
