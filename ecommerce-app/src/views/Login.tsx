@@ -19,7 +19,7 @@ export default function Login({ navigation }: Props) {
     <View style={styles.container}>
       <View style={styles.logoArea}>
         <Ionicons name="cart-outline" size={64} color="#fff" style={styles.logoIcon} />
-        <Text style={styles.logoTitle}>TechShop</Text>
+        <Text style={styles.logoTitle}>Gear Shop</Text>
         <Text style={styles.logoSubtitle}>Tu tienda de tecnología favorita</Text>
       </View>
 

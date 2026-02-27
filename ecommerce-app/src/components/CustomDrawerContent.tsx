@@ -117,7 +117,7 @@ export default function CustomDrawerContent(props: DrawerContentComponentProps) 
             <Text style={styles.logoutText}>Cerrar sesión</Text>
           </View>
         </TouchableOpacity>
-        <Text style={styles.version}>TechShop v1.0.0</Text>
+        <Text style={styles.version}>Gear Shop v1.0.0</Text>
       </View>
     </DrawerContentScrollView>
   );

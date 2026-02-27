@@ -1,31 +1,31 @@
-# 🛍️ TechShop — App de Comercio Electrónico con React Native
+# Gear Shop — App de Comercio Electronico con React Native
 
-Aplicación de e-commerce desarrollada en **Expo + React Native** con **TypeScript**, que demuestra la integración de **Stack Navigator**, **Bottom Tabs** y **Drawer Navigator** junto con un carrito de compras funcional.
+Aplicacion de e-commerce desarrollada en Expo + React Native con TypeScript, que demuestra la integracion de Stack Navigator, Bottom Tabs y Drawer Navigator junto con un carrito de compras funcional.
 
 ---
 
-## 📱 Pantallas
+## Pantallas
 
-| Pantalla | Descripción |
+| Pantalla | Descripcion |
 |---|---|
-| **Home** | Lista de productos con búsqueda y filtro por categoría |
-| **ProductDetails** | Detalle del producto con header dinámico, favoritos y compartir |
-| **Cart** | Resumen del carrito con gestión de cantidades |
-| **Checkout** | Formulario de envío y pago |
+| **Home** | Lista de productos con busqueda y filtro por categoria |
+| **ProductDetails** | Detalle del producto con header dinamico, favoritos y compartir |
+| **Cart** | Resumen del carrito con gestion de cantidades |
+| **Checkout** | Formulario de envio y pago |
 | **Profile** | Perfil de usuario e historial de pedidos |
 | **Settings** | Ajustes y referencia de deep links |
-| **Login** | Pantalla de inicio de sesión |
+| **Login** | Pantalla de inicio de sesion |
 
 ---
 
-## 🗂️ Estructura del proyecto
+## Estructura del proyecto
 
 ```
 src/
 ├── context/
 │   └── CartContext.tsx      # Estado global del carrito (React Context)
 ├── data/
-│   └── products.ts         # Catálogo de productos demo
+│   └── products.ts         # Catalogo de productos demo
 ├── views/
 │   ├── Home.tsx
 │   ├── ProductDetails.tsx
@@ -36,12 +36,12 @@ src/
 │   └── Login.tsx
 └── components/
     └── CustomDrawerContent.tsx
-App.tsx                      # Navegación raíz + tipos
+App.tsx                      # Navegacion raiz + tipos
 ```
 
 ---
 
-## 🧭 Estructura de navegación
+## Estructura de navegacion
 
 ```
 RootDrawer (Drawer.Navigator)
@@ -58,37 +58,85 @@ RootDrawer (Drawer.Navigator)
 
 ---
 
-## 🚀 Cómo ejecutar
+## Como ejecutar
 
 ### Requisitos
-- Node.js ≥ 18
-- Expo CLI instalado globalmente: `npm i -g expo-cli`
-- App **Expo Go** en tu teléfono (iOS o Android)
+- Node.js >= 18
+- Expo Go en tu dispositivo (si usas Expo) o entorno de simulador configurado.
 
-### Instalación
+### Con Expo (Recomendado)
 
-```bash
-# Clonar / descomprimir el proyecto
-cd ecommerce-app
+1. Instalar dependencias:
+   ```bash
+   npm install
+   ```
+2. Iniciar el servidor de desarrollo:
+   ```bash
+   npm start
+   ```
+3. Escanear el codigo QR en la terminal con la aplicacion Expo Go.
 
-# Instalar dependencias
-npm install
+### Con React Native CLI (Prebuild)
 
-# Iniciar el servidor de desarrollo
-npm start
-# o
-expo start
-```
+Si prefieres ejecutarlo como una aplicacion nativa:
 
-Escanea el QR con la app Expo Go o pulsa `a` para Android / `i` para iOS en simulador.
+1. Instalar dependencias:
+   ```bash
+   npm install
+   ```
+2. Ejecutar para Android:
+   ```bash
+   npx expo run:android
+   ```
+3. Ejecutar para iOS (solo macOS):
+   ```bash
+   npx expo run:ios
+   ```
 
 ---
 
-## 🔗 Deep Linking
+## Dependencias instaladas
 
-### Configuración
+El proyecto utiliza las siguientes librerias principales:
 
-El prefijo configurado es `myapp://`. En Expo Go también funciona con la URL `exp://`.
+- **Core**: `expo`, `react`, `react-native`.
+- **Navegacion**: `@react-navigation/native`, `@react-navigation/native-stack`, `@react-navigation/bottom-tabs`, `@react-navigation/drawer`, `expo-router`.
+- **IU y Animaciones**: `react-native-reanimated`, `react-native-gesture-handler`, `react-native-safe-area-context`, `react-native-screens`.
+- **Utilidades**: `expo-linking`, `expo-font`, `expo-image`, `expo-haptics`, `expo-status-bar`.
+
+Lista completa desde `package.json`:
+- `@expo/vector-icons`
+- `@react-navigation/bottom-tabs`
+- `@react-navigation/drawer`
+- `@react-navigation/elements`
+- `@react-navigation/native`
+- `@react-navigation/native-stack`
+- `expo`
+- `expo-constants`
+- `expo-font`
+- `expo-haptics`
+- `expo-image`
+- `expo-linking`
+- `expo-router`
+- `expo-splash-screen`
+- `expo-status-bar`
+- `expo-symbols`
+- `expo-system-ui`
+- `expo-web-browser`
+- `react`
+- `react-native`
+- `react-native-gesture-handler`
+- `react-native-reanimated`
+- `react-native-safe-area-context`
+- `react-native-screens`
+
+---
+
+## Deep Linking
+
+### Configuracion
+
+El prefijo configurado es `myapp://`. En Expo Go tambien funciona con la URL `exp://`.
 
 ### URLs soportadas
 
@@ -96,148 +144,27 @@ El prefijo configurado es `myapp://`. En Expo Go también funciona con la URL `e
 |---|---|
 | `myapp://home` | Home (lista de productos) |
 | `myapp://product/1` | Detalle del producto con ID 1 |
-| `myapp://product/3` | Detalle del producto con ID 3 |
 | `myapp://cart` | Carrito de compras |
 | `myapp://checkout` | Finalizar compra |
 | `myapp://profile` | Perfil de usuario |
 | `myapp://settings` | Ajustes |
 | `myapp://login` | Pantalla de login |
 
-### Cómo probar deep links
+---
 
-**Android (adb):**
-```bash
-# Asegúrate de tener adb instalado y el dispositivo conectado
-adb shell am start -W -a android.intent.action.VIEW -d "myapp://product/1"
-adb shell am start -W -a android.intent.action.VIEW -d "myapp://cart"
-```
+## Patrones clave implementados
 
-**iOS (Simulator):**
-```bash
-xcrun simctl openurl booted "myapp://product/1"
-xcrun simctl openurl booted "myapp://home"
-```
-
-**Expo Go (durante desarrollo):**
-```bash
-npx uri-scheme open "exp://127.0.0.1:8081/--/product/1" --android
-# o abre la URL directamente desde el navegador del dispositivo
-```
-
-**Programáticamente (dentro de la app):**
-```ts
-import * as Linking from 'expo-linking';
-Linking.openURL('myapp://product/2');
-```
+- **Tipado de parametros**: Uso de `MainStackParamList` para asegurar que las rutas reciban los datos correctos.
+- **Header dinamico**: Uso de `navigation.setOptions` para actualizar botones y titulos en tiempo real.
+- **CustomDrawerContent**: Componente personalizado para el menu lateral con avatar y cierre de sesion.
+- **CartContext**: Gestion centralizada del estado del carrito mediante React Context API.
 
 ---
 
-## 🧩 Patrones clave implementados
+## Flujo de compra
 
-### 1. Tipado de parámetros entre pantallas
-
-```ts
-// App.tsx
-export type MainStackParamList = {
-  HomeTabs: NavigatorScreenParams<HomeTabsParamList> | undefined;
-  ProductDetails: { productId: number };  // ← parámetro tipado
-  Cart: undefined;
-  Checkout: undefined;
-  Login: undefined;
-};
-```
-
-### 2. Navegación con parámetros
-
-```ts
-// Desde Home → ProductDetails
-navigation.navigate("ProductDetails", { productId: product.id });
-
-// Desde Checkout → Home (tras completar pedido)
-navigation.navigate("HomeTabs", { screen: "Home" });
-```
-
-### 3. Header dinámico con navigation.setOptions
-
-```ts
-// ProductDetails.tsx — actualiza el header cuando cambian favoritos
-useEffect(() => {
-  navigation.setOptions({
-    title: product.name,
-    headerRight: () => (
-      <View style={{ flexDirection: "row", gap: 12 }}>
-        <TouchableOpacity onPress={() => toggleFavorite(productId)}>
-          <Text>{isFav ? "❤️" : "🤍"}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={handleShare}>
-          <Text>📤</Text>
-        </TouchableOpacity>
-      </View>
-    ),
-  });
-}, [product, isFav]);
-```
-
-### 4. CustomDrawerContent con logout
-
-```ts
-// CustomDrawerContent.tsx
-const handleLogout = () => {
-  props.navigation.navigate("Inicio", { screen: "Login" });
-};
-
-<TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-  <Text>🚪 Cerrar sesión</Text>
-</TouchableOpacity>
-```
-
-### 5. CartContext — estado global
-
-```ts
-// Acceder al carrito desde cualquier componente
-const { addToCart, items, totalItems, totalPrice } = useCart();
-```
-
----
-
-## 📦 Dependencias principales
-
-```json
-{
-  "@react-navigation/native": "^7.x",
-  "@react-navigation/native-stack": "^7.x",
-  "@react-navigation/bottom-tabs": "^7.x",
-  "@react-navigation/drawer": "^7.x",
-  "expo-linking": "~8.x",
-  "react-native-gesture-handler": "~2.x",
-  "react-native-reanimated": "~4.x"
-}
-```
-
----
-
-## 🎓 Objetivos de aprendizaje cubiertos
-
-- ✅ Stack + Bottom Tabs + Drawer combinados
-- ✅ Paso de parámetros tipados con `RootStackParamList`
-- ✅ Header personalizado con `navigation.setOptions`
-- ✅ Deep linking configurado con `myapp://`
-- ✅ `CustomDrawerContent` con avatar, info de usuario y logout
-- ✅ Estado global del carrito con React Context
-- ✅ Flujo completo: Home → ProductDetails → Cart → Checkout
-
----
-
-## 🔄 Flujo de compra
-
-```
-Home (lista productos)
-    ↓ tap en producto
-ProductDetails (+ favorito / compartir)
-    ↓ "Añadir al carrito"
-Cart (ver resumen, ajustar cantidades)
-    ↓ "Proceder al pago"
-Checkout (formulario datos + pago)
-    ↓ "Pagar"
-✅ Confirmación → Vuelta a Home
-```
+1. **Home**: Lista de productos.
+2. **ProductDetails**: Detalle y adicion al carrito.
+3. **Cart**: Gestion de cantidades y resumen.
+4. **Checkout**: Formulario de pago y confirmacion.
+5. **Confirmacion**: Retorno a Home tras finalizar el pedido.
