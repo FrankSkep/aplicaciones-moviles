@@ -1,5 +1,5 @@
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { useCart } from "../context/CartContext";
 
 const ORDER_HISTORY = [
@@ -61,9 +61,20 @@ export default function Profile() {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Configuración de cuenta</Text>
-        {["Datos personales", "Métodos de pago", "Direcciones", "Notificaciones", "Privacidad"].map((item) => (
-          <TouchableOpacity key={item} style={styles.menuItem}>
-            <Text style={styles.menuItemText}>{item}</Text>
+        {([
+          { label: "Datos personales", icon: "person-outline" },
+          { label: "Métodos de pago",  icon: "card-outline" },
+          { label: "Direcciones",       icon: "location-outline" },
+          { label: "Notificaciones",    icon: "notifications-outline" },
+          { label: "Privacidad",        icon: "lock-closed-outline" },
+        ] as { label: string; icon: keyof typeof Ionicons.glyphMap }[]).map((item) => (
+          <TouchableOpacity key={item.label} style={styles.menuItem}>
+            <View style={styles.menuItemLeft}>
+              <View style={styles.menuIconBox}>
+                <Ionicons name={item.icon} size={18} color="#0f766e" />
+              </View>
+              <Text style={styles.menuItemText}>{item.label}</Text>
+            </View>
             <Text style={styles.menuArrow}>›</Text>
           </TouchableOpacity>
         ))}
@@ -94,6 +105,8 @@ const styles = StyleSheet.create({
   orderMeta: { fontSize: 12, color: "#94a3b8", marginBottom: 2 },
   orderTotal: { fontSize: 15, fontWeight: "700", color: "#0f766e" },
   menuItem: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: "#f1f5f9" },
+  menuItemLeft: { flexDirection: "row", alignItems: "center", gap: 12 },
+  menuIconBox: { width: 34, height: 34, borderRadius: 10, backgroundColor: "#f0fdf4", alignItems: "center", justifyContent: "center" },
   menuItemText: { fontSize: 15, color: "#334155" },
   menuArrow: { fontSize: 20, color: "#94a3b8" },
 });

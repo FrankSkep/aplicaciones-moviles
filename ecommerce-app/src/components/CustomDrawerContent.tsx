@@ -5,11 +5,20 @@ import {
   DrawerItemList,
 } from "@react-navigation/drawer";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { AntDesign } from "@expo/vector-icons";
+import { useNavigationState } from "@react-navigation/native";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { useCart } from "../context/CartContext";
+
+function getActiveLeafRoute(state: any): string {
+  if (!state?.routes) return "";
+  const route = state.routes[state.index ?? 0];
+  if (route.state) return getActiveLeafRoute(route.state);
+  return route.name as string;
+}
 
 export default function CustomDrawerContent(props: DrawerContentComponentProps) {
   const { totalItems, totalPrice, favorites } = useCart();
+  const activeRoute = useNavigationState((state) => getActiveLeafRoute(state));
 
   const handleLogout = () => {
     props.navigation.navigate("Inicio", {
@@ -28,7 +37,7 @@ export default function CustomDrawerContent(props: DrawerContentComponentProps) 
         <Text style={styles.email}>francisco@ejemplo.com</Text>
         <View style={styles.badgesRow}>
           <View style={styles.badge}>
-            <AntDesign name="shoppingcart" size={12} color="#fff" />
+            <Ionicons name="cart-outline" size={12} color="#fff" />
             <Text style={styles.badgeText}> {totalItems} items</Text>
           </View>
           <View style={styles.badge}>
@@ -48,6 +57,10 @@ export default function CustomDrawerContent(props: DrawerContentComponentProps) 
         <Text style={styles.actionsTitle}>Acciones rápidas</Text>
         <DrawerItem
           label="Inicio"
+          focused={activeRoute === "Home"}
+          activeTintColor="#0f766e"
+          inactiveTintColor="#64748b"
+          activeBackgroundColor="#f0fdf4"
           icon={({ color, size }) => <AntDesign name="home" size={size} color={color} />}
           onPress={() =>
             props.navigation.navigate("Inicio", {
@@ -59,7 +72,11 @@ export default function CustomDrawerContent(props: DrawerContentComponentProps) 
         />
         <DrawerItem
           label="Carrito"
-          icon={({ color, size }) => <AntDesign name="shoppingcart" size={size} color={color} />}
+          focused={activeRoute === "Cart"}
+          activeTintColor="#0f766e"
+          inactiveTintColor="#64748b"
+          activeBackgroundColor="#f0fdf4"
+          icon={({ color, size }) => <Ionicons name="cart-outline" size={size} color={color} />}
           onPress={() =>
             props.navigation.navigate("Inicio", { screen: "Cart" } as any)
           }
@@ -67,6 +84,10 @@ export default function CustomDrawerContent(props: DrawerContentComponentProps) 
         />
         <DrawerItem
           label="Mi perfil"
+          focused={activeRoute === "Profile"}
+          activeTintColor="#0f766e"
+          inactiveTintColor="#64748b"
+          activeBackgroundColor="#f0fdf4"
           icon={({ color, size }) => <AntDesign name="user" size={size} color={color} />}
           onPress={() =>
             props.navigation.navigate("Inicio", {

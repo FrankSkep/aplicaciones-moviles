@@ -1,5 +1,5 @@
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { AntDesign } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MainStackParamList } from "../../App";
 import { useCart } from "../context/CartContext";
@@ -12,7 +12,7 @@ export default function Cart({ navigation }: Props) {
   if (items.length === 0) {
     return (
       <View style={styles.emptyContainer}>
-        <AntDesign name="shoppingcart" size={80} color="#94a3b8" style={{ marginBottom: 16 }} />
+        <Ionicons name="cart-outline" size={80} color="#94a3b8" style={{ marginBottom: 16 }} />
         <Text style={styles.emptyTitle}>Tu carrito está vacío</Text>
         <Text style={styles.emptySubtitle}>Añade productos para comenzar</Text>
         <TouchableOpacity style={styles.shopBtn} onPress={() => navigation.goBack()}>
@@ -47,7 +47,7 @@ export default function Cart({ navigation }: Props) {
             <View style={styles.itemRight}>
               <Text style={styles.itemTotal}>${(item.product.price * item.quantity).toFixed(2)}</Text>
               <TouchableOpacity onPress={() => removeFromCart(item.product.id)}>
-                <AntDesign name="delete" size={20} color="#ef4444" />
+                <Ionicons name="trash-outline" size={20} color="#ef4444" />
               </TouchableOpacity>
             </View>
           </View>

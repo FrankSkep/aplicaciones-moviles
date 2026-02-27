@@ -10,7 +10,7 @@ import * as ExpoLinking from "expo-linking";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createDrawerNavigator } from "@react-navigation/drawer";
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
 
 import Home from "./src/views/Home";
 import Profile from "./src/views/Profile";
@@ -109,7 +109,7 @@ function MainStackNavigator() {
         name="HomeTabs"
         component={HomeTabsNavigator}
         options={({ navigation }) => ({
-          title: "TechShop",
+          title: "Gear Shop",
           headerLeft: () => (
             <TouchableOpacity
               onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
@@ -123,7 +123,7 @@ function MainStackNavigator() {
               onPress={() => navigation.navigate("Cart")}
               style={{ marginLeft: 8, position: "relative" }}
             >
-              <AntDesign name="shoppingcart" size={26} color="#0f766e" />
+              <Ionicons name="cart-outline" size={26} color="#0f766e" />
               {totalItems > 0 && (
                 <View style={{ position: "absolute", top: -6, right: -8, backgroundColor: "#ef4444", borderRadius: 10, minWidth: 18, height: 18, alignItems: "center", justifyContent: "center", paddingHorizontal: 3 }}>
                   <Text style={{ color: "#fff", fontSize: 10, fontWeight: "700" }}>{totalItems}</Text>
@@ -213,7 +213,7 @@ function AppNavigator() {
         <Drawer.Screen
           name="Inicio"
           component={MainStackNavigator}
-          options={{ title: "TechShop" }}
+          options={{ title: "Gear Shop" }}
         />
       </Drawer.Navigator>
     </NavigationContainer>

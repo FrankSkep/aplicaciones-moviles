@@ -12,7 +12,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { MainStackParamList } from "../../App";
 import { CATEGORIES, PRODUCTS, Product } from "../data/products";
 import { useCart } from "../context/CartContext";
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
 
@@ -48,7 +48,7 @@ export default function Home() {
           placeholderTextColor="#94a3b8"
         />
         <TouchableOpacity style={styles.cartBtn} onPress={goToCart}>
-          <AntDesign name="shoppingcart" size={24} color="#fff" />
+          <Ionicons name="cart-outline" size={24} color="#fff" />
           {totalItems > 0 && (
             <View style={styles.badge}>
               <Text style={styles.badgeText}>{totalItems}</Text>
@@ -57,23 +57,26 @@ export default function Home() {
         </TouchableOpacity>
       </View>
 
-      <FlatList
-        data={CATEGORIES}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        keyExtractor={(item) => item}
-        contentContainerStyle={styles.catList}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={[styles.catChip, selectedCategory === item && styles.catChipActive]}
-            onPress={() => setSelectedCategory(item)}
-          >
-            <Text style={[styles.catText, selectedCategory === item && styles.catTextActive]}>
-              {item}
-            </Text>
-          </TouchableOpacity>
-        )}
-      />
+      <View style={styles.catRow}>
+        <FlatList
+          data={CATEGORIES}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(item) => item}
+          contentContainerStyle={styles.catList}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={[styles.catChip, selectedCategory === item && styles.catChipActive]}
+              onPress={() => setSelectedCategory(item)}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.catText, selectedCategory === item && styles.catTextActive]}>
+                {item}
+              </Text>
+            </TouchableOpacity>
+          )}
+        />
+      </View>
 
       <FlatList
         data={filtered}
@@ -112,8 +115,9 @@ const styles = StyleSheet.create({
   cartBtn: { width: 46, height: 46, backgroundColor: "#0f766e", borderRadius: 12, alignItems: "center", justifyContent: "center" },
   badge: { position: "absolute", top: -4, right: -4, backgroundColor: "#ef4444", borderRadius: 10, minWidth: 20, height: 20, alignItems: "center", justifyContent: "center", paddingHorizontal: 4 },
   badgeText: { color: "#fff", fontSize: 11, fontWeight: "700" },
-  catList: { paddingHorizontal: 16, paddingBottom: 10, gap: 8 },
-  catChip: { paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20, backgroundColor: "#fff", borderWidth: 1, borderColor: "#e2e8f0" },
+  catRow: { height: 48, justifyContent: "center" },
+  catList: { paddingHorizontal: 16, alignItems: "center", gap: 8 },
+  catChip: { height: 34, paddingHorizontal: 16, borderRadius: 17, backgroundColor: "#fff", borderWidth: 1, borderColor: "#e2e8f0", justifyContent: "center", alignItems: "center" },
   catChipActive: { backgroundColor: "#0f766e", borderColor: "#0f766e" },
   catText: { fontSize: 13, color: "#64748b", fontWeight: "500" },
   catTextActive: { color: "#fff" },

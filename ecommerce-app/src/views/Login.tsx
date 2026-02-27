@@ -1,5 +1,5 @@
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MainStackParamList } from "../../App";
@@ -18,7 +18,7 @@ export default function Login({ navigation }: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.logoArea}>
-        <AntDesign name="shoppingcart" size={64} color="#fff" style={styles.logoIcon} />
+        <Ionicons name="cart-outline" size={64} color="#fff" style={styles.logoIcon} />
         <Text style={styles.logoTitle}>TechShop</Text>
         <Text style={styles.logoSubtitle}>Tu tienda de tecnología favorita</Text>
       </View>

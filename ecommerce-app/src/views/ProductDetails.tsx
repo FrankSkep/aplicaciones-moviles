@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { AntDesign } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MainStackParamList } from "../../App";
 import { PRODUCTS } from "../data/products";
@@ -9,7 +9,7 @@ import { useCart } from "../context/CartContext";
 type Props = NativeStackScreenProps<MainStackParamList, "ProductDetails">;
 
 export default function ProductDetails({ route, navigation }: Props) {
-  const { productId } = route.params;
+  const productId = Number(route.params.productId);
   const product = PRODUCTS.find((p) => p.id === productId);
   const { addToCart, favorites, toggleFavorite } = useCart();
 
@@ -22,19 +22,19 @@ export default function ProductDetails({ route, navigation }: Props) {
       headerRight: () => (
         <View style={{ flexDirection: "row", gap: 12, marginRight: 4 }}>
           <TouchableOpacity onPress={() => toggleFavorite(productId)}>
-            <AntDesign name={isFav ? "heart" : "hearto"} size={22} color={isFav ? "#ef4444" : "#94a3b8"} />
+            <Ionicons name={isFav ? "heart" : "heart-outline"} size={22} color={isFav ? "#ef4444" : "#94a3b8"} />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() =>
               Alert.alert("Compartir", `Compartiendo: ${product.name}\nmyapp://product/${product.id}`)
             }
           >
-            <AntDesign name="sharealt" size={22} color="#64748b" />
+            <Ionicons name="share-social-outline" size={22} color="#64748b" />
           </TouchableOpacity>
         </View>
       ),
     });
-  }, [product, isFav]);
+  }, [product, isFav, productId]);
 
   if (!product) {
     return (
@@ -64,7 +64,7 @@ export default function ProductDetails({ route, navigation }: Props) {
         <View style={styles.categoryRow}>
           <Text style={styles.category}>{product.category}</Text>
           <View style={styles.stockRow}>
-            <AntDesign name={product.stock > 0 ? "checkcircle" : "closecircle"} size={12} color={product.stock > 0 ? "#16a34a" : "#ef4444"} />
+            <Ionicons name={product.stock > 0 ? "checkmark-circle" : "close-circle"} size={12} color={product.stock > 0 ? "#16a34a" : "#ef4444"} />
             <Text style={styles.stock}>
               {product.stock > 0 ? `${product.stock} en stock` : "Sin stock"}
             </Text>
@@ -95,7 +95,7 @@ export default function ProductDetails({ route, navigation }: Props) {
         disabled={product.stock === 0}
       >
         <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-          {product.stock > 0 && <AntDesign name="shoppingcart" size={20} color="#fff" />}
+          {product.stock > 0 && <Ionicons name="cart-outline" size={20} color="#fff" />}
           <Text style={styles.addBtnText}>
             {product.stock > 0 ? "Añadir al carrito" : "Sin stock"}
           </Text>
