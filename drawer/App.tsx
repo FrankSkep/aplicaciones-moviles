@@ -1,4 +1,10 @@
-import { DefaultTheme, DrawerActions, LinkingOptions, NavigationContainer, NavigatorScreenParams } from "@react-navigation/native";
+import {
+  DefaultTheme,
+  DrawerActions,
+  LinkingOptions,
+  NavigationContainer,
+  NavigatorScreenParams,
+} from "@react-navigation/native";
 import { TouchableOpacity } from "react-native";
 import * as ExpoLinking from "expo-linking";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -9,97 +15,116 @@ import { AntDesign } from "@expo/vector-icons";
 import Profile from "./src/views/Profile";
 import Settings from "./src/views/Settings";
 import Details from "./src/views/Details";
+import Camara from "./src/views/Camara";
 import CustomDrawerContent from "./src/components/CustomDrawerContent";
 
-
 export type HomeTabsParamList = {
-    Home: undefined;
-    Profile: undefined;
-    Settings: undefined;
-    Details: { from?: string } | undefined;
+  Home: undefined;
+  Profile: undefined;
+  Settings: undefined;
+  Camera: undefined;
+  Details: { from?: string } | undefined;
 };
 
 export type MainStackParamList = {
   HomeTabs: NavigatorScreenParams<HomeTabsParamList> | undefined;
 };
 
-
 export type RootDrawerParamList = {
   Inicio: NavigatorScreenParams<MainStackParamList> | undefined;
 };
 
-
-const Tab= createBottomTabNavigator<HomeTabsParamList>();
+const Tab = createBottomTabNavigator<HomeTabsParamList>();
 const Stack = createNativeStackNavigator<MainStackParamList>();
 const Drawer = createDrawerNavigator<RootDrawerParamList>();
 
-
 function HomeTabsNavigator() {
-    return (
-        <Tab.Navigator
-            screenOptions={{
-                headerShown: false,
-                tabBarActiveTintColor: "#0f766e",
-                tabBarInactiveTintColor: "#64748b",
-            }}
-        >
-            <Tab.Screen name="Home" component={Home} options={{ 
-              title: "Inicio",
-              tabBarIcon: ({ color, size }) => (
-                <AntDesign name="home" size={size} color={color} />
-              ),
-              }} 
-              />
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: "#0f766e",
+        tabBarInactiveTintColor: "#64748b",
+      }}
+    >
+      <Tab.Screen
+        name="Home"
+        component={Home}
+        options={{
+          title: "Inicio",
+          tabBarIcon: ({ color, size }) => (
+            <AntDesign name="home" size={size} color={color} />
+          ),
+        }}
+      />
 
-              <Tab.Screen name="Profile" component={Profile} options={{ 
-              title: "Perfil",
-              tabBarIcon: ({ color, size }) => (
-                <AntDesign name="user" size={size} color={color} />
-              ),
-              }} 
-              />
+      <Tab.Screen
+        name="Profile"
+        component={Profile}
+        options={{
+          title: "Perfil",
+          tabBarIcon: ({ color, size }) => (
+            <AntDesign name="user" size={size} color={color} />
+          ),
+        }}
+      />
 
-              <Tab.Screen name="Settings" component={Settings} options={{ 
-              title: "Configuración",
-              tabBarIcon: ({ color, size }) => (
-                <AntDesign name="setting" size={size} color={color} />
-              ),
-              }} 
-              />
+      <Tab.Screen
+        name="Settings"
+        component={Settings}
+        options={{
+          title: "Configuración",
+          tabBarIcon: ({ color, size }) => (
+            <AntDesign name="setting" size={size} color={color} />
+          ),
+        }}
+      />
 
-              <Tab.Screen name="Details" component={Details} options={{ 
-              title: "Detalles",
-              tabBarIcon: ({ color, size }) => (
-                <AntDesign name="edit" size={size} color={color} />
-              ),
-              }} 
-              />
+      <Tab.Screen
+        name="Details"
+        component={Details}
+        options={{
+          title: "Detalles",
+          tabBarIcon: ({ color, size }) => (
+            <AntDesign name="edit" size={size} color={color} />
+          ),
+        }}
+      />
 
-        </Tab.Navigator>
-    );
+      <Tab.Screen
+        name="Camera"
+        component={Camara}
+        options={{
+          title: "Cámara",
+          tabBarIcon: ({ color, size }) => (
+            <AntDesign name="camera" size={size} color={color} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+  );
 }
 
-
 function MainStackNavigator() {
-    return (
-        <Stack.Navigator>
-          <Stack.Screen
-            name="HomeTabs"
-            component={HomeTabsNavigator}
-            options={({ navigation }) => ({
-              title: "Mi App",
-              headerLeft: () => (
-                <TouchableOpacity
-                  onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-                  style={{ marginRight: 12 }}
-                >
-                  <AntDesign name="bars" size={24} color="#0f766e" />
-                </TouchableOpacity>
-              ),
-            })}
-          />
-        </Stack.Navigator>
-    );
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="HomeTabs"
+        component={HomeTabsNavigator}
+        options={({ navigation }) => ({
+          title: "Mi App",
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+              style={{ marginRight: 12 }}
+            >
+              <AntDesign name="bars" size={24} color="#0f766e" />
+            </TouchableOpacity>
+          ),
+        })}
+      />
+    </Stack.Navigator>
+  );
 }
 
 const linking: LinkingOptions<RootDrawerParamList> = {
@@ -113,6 +138,7 @@ const linking: LinkingOptions<RootDrawerParamList> = {
               Home: "home",
               Profile: "profile",
               Settings: "settings",
+              Camera: "camera",
               Details: "details/:from?",
             },
           },
@@ -125,27 +151,31 @@ const linking: LinkingOptions<RootDrawerParamList> = {
 console.log(ExpoLinking.createURL("profile"));
 
 export default function App() {
-    return (
-      <NavigationContainer linking={linking} theme={{
+  return (
+    <NavigationContainer
+      linking={linking}
+      theme={{
         ...DefaultTheme,
         colors: {
           ...DefaultTheme.colors,
           background: "#f8f8f8",
         },
-      }}>
-        <Drawer.Navigator 
+      }}
+    >
+      <Drawer.Navigator
         initialRouteName="Inicio"
         drawerContent={(props: any) => <CustomDrawerContent {...props} />}
-         screenOptions={{
+        screenOptions={{
           headerShown: false,
           drawerActiveTintColor: "#0f766e",
-        }}>
-          <Drawer.Screen 
-          name="Inicio" 
+        }}
+      >
+        <Drawer.Screen
+          name="Inicio"
           component={MainStackNavigator}
-          options={{title: "Navegación Principal"}}
-          />
-         </Drawer.Navigator>
-      </NavigationContainer>
-    );
+          options={{ title: "Navegación Principal" }}
+        />
+      </Drawer.Navigator>
+    </NavigationContainer>
+  );
 }
