@@ -1,3 +1,13 @@
+/**
+ * ============================================================
+ * ESTADO GLOBAL — CADA VISTA USA UNA SOLUCIÓN DISTINTA
+ * ============================================================
+ *  Home      → Redux Toolkit  (contador)
+ *  Profile   → Zustand        (usuario + contador propio)
+ *  Settings  → Context API    (tema claro/oscuro)
+ * ============================================================
+ */
+
 import {
   DefaultTheme,
   DrawerActions,
@@ -6,6 +16,13 @@ import {
   NavigatorScreenParams,
 } from "@react-navigation/native";
 import { TouchableOpacity } from "react-native";
+
+// Context API — envuelve Settings
+import { AppProvider } from "./src/state/context/AppProvider";
+// Redux Toolkit — envuelve Home
+import { Provider } from "react-redux";
+import { store } from "./src/state/redux/store";
+// Zustand — sin Provider, Profile lo usa directamente
 import * as ExpoLinking from "expo-linking";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -152,30 +169,35 @@ console.log(ExpoLinking.createURL("profile"));
 
 export default function App() {
   return (
-    <NavigationContainer
-      linking={linking}
-      theme={{
-        ...DefaultTheme,
-        colors: {
-          ...DefaultTheme.colors,
-          background: "#f8f8f8",
-        },
-      }}
-    >
-      <Drawer.Navigator
-        initialRouteName="Inicio"
-        drawerContent={(props: any) => <CustomDrawerContent {...props} />}
-        screenOptions={{
-          headerShown: false,
-          drawerActiveTintColor: "#0f766e",
+    <Provider store={store}>
+      <AppProvider>
+        <NavigationContainer
+        linking={linking}
+        theme={{
+          ...DefaultTheme,
+          colors: {
+            ...DefaultTheme.colors,
+            background: "#f8f8f8",
+          },
         }}
       >
-        <Drawer.Screen
-          name="Inicio"
-          component={MainStackNavigator}
-          options={{ title: "Navegación Principal" }}
-        />
-      </Drawer.Navigator>
-    </NavigationContainer>
+        <Drawer.Navigator
+          initialRouteName="Inicio"
+          drawerContent={(props: any) => <CustomDrawerContent {...props} />}
+          screenOptions={{
+            headerShown: false,
+            drawerActiveTintColor: "#0f766e",
+          }}
+        >
+          <Drawer.Screen
+            name="Inicio"
+            component={MainStackNavigator}
+            options={{ title: "Navegación Principal" }}
+          />
+        </Drawer.Navigator>
+        </NavigationContainer>
+      </AppProvider>
+    </Provider>
   );
+  // );
 }
