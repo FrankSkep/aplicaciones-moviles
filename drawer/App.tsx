@@ -34,6 +34,8 @@ import Settings from "./src/views/Settings";
 import Details from "./src/views/Details";
 import Camara from "./src/views/Camara";
 import CustomDrawerContent from "./src/components/CustomDrawerContent";
+import { useState } from "react";
+import GeolocalizacionView from "./src/views/GeolocalizacionView";
 
 export type HomeTabsParamList = {
   Home: undefined;
@@ -41,6 +43,7 @@ export type HomeTabsParamList = {
   Settings: undefined;
   Camera: undefined;
   Details: { from?: string } | undefined;
+  Geolocalizacion: undefined;
 };
 
 export type MainStackParamList = {
@@ -118,6 +121,16 @@ function HomeTabsNavigator() {
           ),
         }}
       />
+      <Tab.Screen
+        name="Geolocalizacion"
+        component={GeolocalizacionView}
+        options={{
+          title: "Geolocalización",
+          tabBarIcon: ({ color, size }) => (
+            <AntDesign name="environment" size={size} color={color} />
+          ),
+        }}
+      />
     </Tab.Navigator>
   );
 }
@@ -157,6 +170,7 @@ const linking: LinkingOptions<RootDrawerParamList> = {
               Settings: "settings",
               Camera: "camera",
               Details: "details/:from?",
+              Geolocalizacion: "geolocalizacion",
             },
           },
         },
