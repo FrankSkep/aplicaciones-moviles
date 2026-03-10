@@ -83,6 +83,8 @@ export default function GeolocalizacionView() {
         setSubscripcion(null);
     }
 
+    
+
     return (
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
             <Text>Geolocalización</Text>

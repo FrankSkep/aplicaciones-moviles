@@ -36,6 +36,8 @@ import Camara from "./src/views/Camara";
 import CustomDrawerContent from "./src/components/CustomDrawerContent";
 import { useState } from "react";
 import GeolocalizacionView from "./src/views/GeolocalizacionView";
+import BuscarCoordenadas from "./src/views/BuscarCoordenadas";
+import Sensores from "./src/views/Sensores";
 
 export type HomeTabsParamList = {
   Home: undefined;
@@ -44,6 +46,8 @@ export type HomeTabsParamList = {
   Camera: undefined;
   Details: { from?: string } | undefined;
   Geolocalizacion: undefined;
+  BuscarCoordenadas: undefined;
+  Sensores: undefined;
 };
 
 export type MainStackParamList = {
@@ -131,6 +135,27 @@ function HomeTabsNavigator() {
           ),
         }}
       />
+      <Tab.Screen
+        name="BuscarCoordenadas"
+        component={BuscarCoordenadas}
+        options={{
+          title: "Buscar Coordenadas",
+          tabBarIcon: ({ color, size }) => (
+            <AntDesign name="search" size={size} color={color} />
+          ),
+        }}
+      />
+
+      <Tab.Screen
+        name="Sensores"
+        component={Sensores}
+        options={{
+          title: "Sensores",
+          tabBarIcon: ({ color, size }) => (
+            <AntDesign name="eye" size={size} color={color} />
+          ),
+        }}
+      />
     </Tab.Navigator>
   );
 }
@@ -171,6 +196,8 @@ const linking: LinkingOptions<RootDrawerParamList> = {
               Camera: "camera",
               Details: "details/:from?",
               Geolocalizacion: "geolocalizacion",
+              BuscarCoordenadas: "buscar-coordenadas",
+              Sensores: "sensores",
             },
           },
         },
