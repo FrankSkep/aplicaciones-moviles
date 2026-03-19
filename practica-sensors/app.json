@@ -1,0 +1,59 @@
+{
+  "expo": {
+    "name": "practica-sensors",
+    "slug": "practica-sensors",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_IMAGES"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        { "cameraPermission": "La app necesita la cámara para capturar fotos automáticamente." }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "La app usa la ubicación para registrar coordenadas en la foto.",
+          "locationWhenInUsePermission": "La app usa la ubicación para registrar coordenadas en la foto."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "La app necesita acceso a la galería para guardar las fotos capturadas.",
+          "savePhotosPermission": "La app necesita permiso para guardar fotos en tu galería.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ]
+    ],
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
