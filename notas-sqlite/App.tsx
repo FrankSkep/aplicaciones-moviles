@@ -1,168 +1,260 @@
-import { DefaultTheme, NavigationContainer, NavigatorScreenParams } from "@react-navigation/native";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { createDrawerNavigator } from "@react-navigation/drawer";
-import { AntDesign, MaterialIcons } from "@expo/vector-icons";
-import CustomDrawerContent from "./src/components/CustomDrawerContent";
-import { TouchableOpacity } from "react-native";
-import Home from "./src/views/Home";
-import Notas from "./src/views/Notas";
-import Usuarios from "./src/views/Usuarios";
+import { useEffect, useState } from "react";
+import { Alert, Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import * as Notifications from "expo-notifications";
+import * as Device from "expo-device";
+import Constants from "expo-constants";
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
-import { initDatabase } from "./db/initDatabase";
+async function registerForPushNotificationsAsync() {
+  if (Platform.OS === "android") {
+    await Notifications.setNotificationChannelAsync("default", {
+      name: "default",
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: "#FF231F7C",
+    });
+  }
 
+  const { status: existingStatus } = await Notifications.getPermissionsAsync();
+  let finalStatus = existingStatus;
 
-import * as ExpoLinking from 'expo-linking';
-import { LinkingOptions } from "@react-navigation/native";
-import { useEffect } from "react";
+  if (existingStatus !== "granted") {
+    const { status } = await Notifications.requestPermissionsAsync();
+    finalStatus = status;
+  }
 
-// Deep Linking Configuration
-const linking: LinkingOptions<RootDrawerParamList> = {
-  prefixes: [ExpoLinking.createURL('/'), 'myapp://'],
-  config: {
-    screens: {
-      Inicio: {
-        screens: {
-          HomeTabs: {
-            screens: {
-              Home: 'home',
-              Usuarios: 'usuarios',
-              Notas: 'notas',
-            },
-          },
-        },
-      },
+  return finalStatus === "granted";
+}
+
+async function getExpoPushTokenAsync() {
+  if (!Device.isDevice) {
+    throw new Error("Las push remotas requieren un dispositivo físico.");
+  }
+
+  const projectId =
+    Constants?.expoConfig?.extra?.eas?.projectId ??
+    Constants?.easConfig?.projectId;
+
+  if (!projectId) {
+    throw new Error("No se encontró projectId de EAS en la configuración.");
+  }
+
+  const token = await Notifications.getExpoPushTokenAsync({ projectId });
+  return token.data;
+}
+
+async function sendRemotePushNotification(expoPushToken: string) {
+  const message = {
+    to: expoPushToken,
+    sound: "default",
+    title: "Push remota de prueba",
+    body: "Esta push fue enviada usando EAS projectId + Expo Push API.",
+    data: { source: "test-remote" },
+  };
+
+  const response = await fetch("https://exp.host/--/api/v2/push/send", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Accept-encoding": "gzip, deflate",
+      "Content-Type": "application/json",
     },
-  },
-};
+    body: JSON.stringify(message),
+  });
 
-
-export type HomeTabsParamList = {
-  Home: undefined;
-  Usuarios: undefined;
-  Notas: { usuario?: any } | undefined;
-};
-
-export type MainStackParamList = {
-  HomeTabs: NavigatorScreenParams<HomeTabsParamList> | undefined;
-};
-
-
-export type RootDrawerParamList = {
-  Inicio: NavigatorScreenParams<MainStackParamList> | undefined;
-};
-
-
-const Tab = createBottomTabNavigator<HomeTabsParamList>();
-const Stack = createNativeStackNavigator<MainStackParamList>();
-const Drawer = createDrawerNavigator<RootDrawerParamList>();
-
-
-function HomeTabsNavigator() {
-  return (
-    <Tab.Navigator
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: "#9000d8",
-        tabBarInactiveTintColor: "#6b5176",
-      }}
-    >
-      <Tab.Screen name="Home" component={Home} options={{
-        title: "Home",
-        tabBarIcon: ({ color, size }) => (
-          <AntDesign name="home" size={size} color={color} />
-        ),
-      }}
-      />
-      <Tab.Screen
-        name="Usuarios"
-        component={Usuarios}
-        options={{
-          title: "Usuarios",
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="people" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Notas"
-        component={Notas}
-        options={{
-          title: "Notas",
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="event-note" size={size} color={color} />
-          ),
-        }}
-      />
-
-    </Tab.Navigator>
-  );
+  if (!response.ok) {
+    throw new Error("No se pudo enviar la push remota.");
+  }
 }
-
-
-function MainStackNavigator() {
-  return (
-    <Stack.Navigator
-      screenOptions={({ navigation }: any) => ({
-        headerShown: true,
-        headerStyle: {
-          backgroundColor: "#480082",
-        },
-        headerTintColor: "#fff",
-        headerTitleStyle: {
-          fontWeight: "700",
-        },
-        headerLeft: () => (
-          <TouchableOpacity
-            onPress={() => navigation.toggleDrawer()}
-            style={{ marginLeft: 16 }}
-          >
-            <MaterialIcons name="menu" size={28} color="#fff" />
-          </TouchableOpacity>
-        ),
-      })}
-    >
-      <Stack.Screen
-        name="HomeTabs"
-        component={HomeTabsNavigator}
-        options={{ title: " NOTES APP" }}
-      />
-    </Stack.Navigator>
-  );
-}
-
 
 export default function App() {
+  const [permissionGranted, setPermissionGranted] = useState(false);
+  const [expoPushToken, setExpoPushToken] = useState("");
+  const [notification, setNotification] = useState<
+    Notifications.Notification | undefined
+  >(undefined);
+
   useEffect(() => {
-    void initDatabase();
+    registerForPushNotificationsAsync().then(setPermissionGranted);
+
+    const notificationListener = Notifications.addNotificationReceivedListener(
+      (notification) => {
+        setNotification(notification);
+      },
+    );
+
+    const responseListener =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        console.log(response);
+      });
+
+    return () => {
+      notificationListener.remove();
+      responseListener.remove();
+    };
   }, []);
 
+  useEffect(() => {
+    if (!permissionGranted || expoPushToken) {
+      return;
+    }
+
+    getExpoPushTokenAsync()
+      .then(setExpoPushToken)
+      .catch((error) => {
+        Alert.alert("Token no disponible", String(error));
+      });
+  }, [permissionGranted, expoPushToken]);
+
+  const handleTestNotification = async () => {
+    if (!permissionGranted) {
+      const granted = await registerForPushNotificationsAsync();
+      setPermissionGranted(granted);
+
+      if (!granted) {
+        Alert.alert(
+          "Permiso requerido",
+          "Debes permitir notificaciones para recibir la prueba.",
+        );
+        return;
+      }
+    }
+
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "Notificación de prueba",
+        body: "¡Funciona! Esta notificación viene de expo-notifications.",
+      },
+      trigger: {
+        seconds: 1,
+        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+      },
+    });
+  };
+
+  const handleRemoteTestNotification = async () => {
+    try {
+      if (!permissionGranted) {
+        const granted = await registerForPushNotificationsAsync();
+        setPermissionGranted(granted);
+
+        if (!granted) {
+          Alert.alert(
+            "Permiso requerido",
+            "Debes permitir notificaciones para enviar la prueba remota.",
+          );
+          return;
+        }
+      }
+
+      const token = expoPushToken || (await getExpoPushTokenAsync());
+      if (!expoPushToken) {
+        setExpoPushToken(token);
+      }
+
+      await sendRemotePushNotification(token);
+      Alert.alert("Enviado", "Se envió la notificación push remota de prueba.");
+    } catch (error) {
+      Alert.alert("Error", String(error));
+    }
+  };
+
   return (
-    <NavigationContainer
-      linking={linking}
-      theme={{
-        ...DefaultTheme,
-        colors: {
-          ...DefaultTheme.colors,
-          background: "#f8f8f8",
-        },
-      }}
-    >
-      <Drawer.Navigator
-        initialRouteName="Inicio"
-        drawerContent={(props: any) => <CustomDrawerContent {...props} />}
-        screenOptions={{
-          headerShown: false,
-          drawerActiveTintColor: "#380f76",
-        }}
+    <View style={styles.container}>
+      <Text style={styles.title}>Prueba de notificaciones</Text>
+      <Text style={styles.subtitle}>
+        Toca un botón para enviar prueba local o remota.
+      </Text>
+
+      <Pressable
+        style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
+        onPress={() => void handleTestNotification()}
       >
-        <Drawer.Screen
-          name="Inicio"
-          component={MainStackNavigator}
-          options={{ title: "Navegación Principal" }}
-        />
-      </Drawer.Navigator>
-    </NavigationContainer>
+        <Text style={styles.buttonText}>Enviar notificación de prueba</Text>
+      </Pressable>
+
+      <Pressable
+        style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
+        onPress={() => void handleRemoteTestNotification()}
+      >
+        <Text style={styles.buttonText}>Enviar push remota (EAS)</Text>
+      </Pressable>
+
+      <Text style={styles.status}>
+        Permiso: {permissionGranted ? "Concedido" : "No concedido"}
+      </Text>
+
+      <Text style={styles.tokenText} numberOfLines={2}>
+        Token: {expoPushToken ? expoPushToken : "No disponible"}
+      </Text>
+
+      {notification && (
+        <Text style={styles.lastNotification}>
+          Última notificación: {notification.request.content.title}
+        </Text>
+      )}
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 20,
+    backgroundColor: "#f8f8f8",
+    gap: 12,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#28044d",
+    textAlign: "center",
+  },
+  subtitle: {
+    fontSize: 14,
+    color: "#575757",
+    textAlign: "center",
+    maxWidth: 340,
+  },
+  button: {
+    width: "100%",
+    maxWidth: 320,
+    backgroundColor: "#6d28d9",
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    alignItems: "center",
+  },
+  buttonPressed: {
+    opacity: 0.85,
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "700",
+  },
+  status: {
+    fontSize: 13,
+    color: "#575757",
+  },
+  tokenText: {
+    fontSize: 12,
+    color: "#575757",
+    textAlign: "center",
+    maxWidth: 340,
+  },
+  lastNotification: {
+    fontSize: 13,
+    color: "#28044d",
+    textAlign: "center",
+  },
+});
