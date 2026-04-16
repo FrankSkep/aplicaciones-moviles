@@ -13,8 +13,8 @@ export class UsuariosResolver {
     return this.usuariosService.create(createUsuarioInput);
   }
 
-  @Query(() => [Usuario], { name: 'usuarios' })
-  findAll() {
+  @Query(() => [Usuario], { name: 'users' })
+  findAllUsers() {
     return this.usuariosService.findAll();
   }
 

@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/graphql'; 
+const API_URL = 'http://10.41.92.63:3000/graphql'; 
 
 type RequestOptions = {
     method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
@@ -15,7 +15,7 @@ export async function apiFetch<T>(endpoint: string, options: RequestOptions = {}
             'Content-Type': 'application/json',
             ...(token ? { Authorization: `Bearer ${token}` } : {})
         },
-        body: body?JSON.stringify(body)
+        body: body ? JSON.stringify(body) : undefined,
     });
 
     let data: unknown = null;
@@ -54,4 +54,5 @@ export async function apiGraphQLFetch<T>(query: string, variables?: Record<strin
     if (json.errors?.length) {
         throw new Error(json.errors[0].message)
     }
+    return json.data as T;
 }
