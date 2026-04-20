@@ -36,7 +36,11 @@ export class UsuariosService {
     });
   }
 
-  remove(id: number) {
+  async remove(id: number) {
+    // Delete associated todos first to avoid foreign key constraint error
+    await this.prisma.todo.deleteMany({
+      where: { userId: id },
+    });
     return this.prisma.user.delete({
       where: { id },
     });

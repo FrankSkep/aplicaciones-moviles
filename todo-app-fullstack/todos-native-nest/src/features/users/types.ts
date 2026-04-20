@@ -1,7 +1,7 @@
 import { Todo } from "../todos/types";
 
 export type User = {
-    id: string;
+    id: number;
     email: string;
     name: string;
     createdAt: Date;
