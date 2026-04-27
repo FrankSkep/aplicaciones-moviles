@@ -7,6 +7,7 @@ import { AppResolver } from './app.resolver';
 import { PrismaModule } from './prisma/prisma.module';
 import { UsuariosModule } from './usuarios/usuarios.module';
 import { TodosModule } from './todos/todos.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { TodosModule } from './todos/todos.module';
     PrismaModule,
     UsuariosModule,
     TodosModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService, AppResolver],

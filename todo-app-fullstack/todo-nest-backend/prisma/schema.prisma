@@ -15,9 +15,11 @@ datasource db {
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
+  name      String
+  passwordHash String
+  createdAt DateTime @default(now()) @map("create_at")
   todos     Todo[]
+  @@map("users")
 }
 
 model Todo {
