@@ -2,6 +2,7 @@ import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { Auth } from './entities/auth.entity';
 import { AuthService } from './auth.service';
 import { CreateAuthInput } from './dto/create-auth.input';
+import { LoginInput } from './dto/login.input';
 import { AuthPayload } from './dto/authpayload.input';
 import { Usuario } from '../usuarios/entities/usuario.entity';
 import { UseGuards } from '@nestjs/common';
@@ -16,10 +17,9 @@ export class AuthResolver {
     return this.authService.register(input);
   }
 
-  @Mutation(() => String)
-  async login() {
-    // Implementa la lógica de inicio de sesión aquí
-    return 'Inicio de sesión exitoso';
+  @Mutation(() => AuthPayload)
+  async login(@Args('input') input: LoginInput) {
+    return this.authService.login(input.email, input.password);
   }
 
   @Mutation(() => AuthPayload)

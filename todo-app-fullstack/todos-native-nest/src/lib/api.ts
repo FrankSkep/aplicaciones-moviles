@@ -1,3 +1,5 @@
+import { getAccessToken } from './secureStore';
+
 const API_URL = 'http://10.41.92.63:3000/graphql'; 
 
 type RequestOptions = {
@@ -8,12 +10,13 @@ type RequestOptions = {
 
 export async function apiFetch<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
     const { method = 'GET', body, token } = options;
+    const finalToken = token || await getAccessToken();
 
     const response = await fetch(`${API_URL}${endpoint}`, {
         method,
         headers: {
             'Content-Type': 'application/json',
-            ...(token ? { Authorization: `Bearer ${token}` } : {})
+            ...(finalToken ? { Authorization: `Bearer ${finalToken}` } : {})
         },
         body: body ? JSON.stringify(body) : undefined,
     });
@@ -40,11 +43,12 @@ export async function apiFetch<T>(endpoint: string, options: RequestOptions = {}
 }
 
 export async function apiGraphQLFetch<T>(query: string, variables?: Record<string, unknown>, token?: string | null | undefined): Promise<T> {
+    const finalToken = token || await getAccessToken();
     const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            ...(token ? { Authorization: `Bearer ${token}` } : {})
+            ...(finalToken ? { Authorization: `Bearer ${finalToken}` } : {})
         },
         body: JSON.stringify({ query, variables })
     });
