@@ -87,5 +87,6 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
-  }
+  },
+  "type": "commonjs"
 }

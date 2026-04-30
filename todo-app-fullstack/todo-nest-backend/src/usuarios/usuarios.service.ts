@@ -11,7 +11,8 @@ export class UsuariosService {
     return this.prisma.user.create({
       data: {
         email: createUsuarioInput.email,
-        name: createUsuarioInput.nombre,
+        name: createUsuarioInput.nombre || '',
+        passwordHash: '', // Es requerido en la base de datos
       },
     });
   }

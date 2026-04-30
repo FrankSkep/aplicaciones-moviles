@@ -23,3 +23,22 @@ export function useLogin() {
         },
     });
 }
+
+export function useRegister() {
+    return useMutation({
+        mutationFn: async ({ name, email, passwordHash }: { name: string; email: string; passwordHash: string }) => {
+            const data = await apiGraphQLFetch<{ register: { id: number; email: string } }>(
+                `
+                mutation Register($name: String!, $email: String!, $passwordHash: String!) {
+                    register(input: { name: $name, email: $email, passwordHash: $passwordHash }) {
+                        id
+                        email
+                    }
+                }
+                `,
+                { name, email, passwordHash }
+            );
+            return data.register;
+        }
+    });
+}

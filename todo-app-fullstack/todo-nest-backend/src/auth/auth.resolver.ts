@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { Auth } from './entities/auth.entity';
 import { AuthService } from './auth.service';
 import { CreateAuthInput } from './dto/create-auth.input';
@@ -12,7 +12,7 @@ import { GqlAuthGuard } from 'src/utils/guard/gqp-auth.guard';
 export class AuthResolver {
   constructor(private readonly authService: AuthService) { }
   
-  @Mutation(() => CreateAuthInput)
+  @Mutation(() => Usuario)
   async register(@Args('input') input: CreateAuthInput) {
     return this.authService.register(input);
   }
@@ -29,7 +29,7 @@ export class AuthResolver {
 
     @UseGuards(GqlAuthGuard)
   @Query(() => Usuario)
-  async getUsuario(@Args('id') id: string) {
+  async getUsuario(@Args('id', { type: () => Int }) id: number) {
     return this.authService.getUsuario(id);
   }
 
