@@ -1,11 +1,7 @@
-import { getAccessToken } from './secureStore';
+import { getAccessToken, getRefreshToken, saveTokens, removeTokens } from './secureStore';
 import { Platform } from 'react-native';
 
-// Ajusta esto si pruebas en emulador Android o dispositivo real
 const getHostIp = () => {
-    // Si estás en emulador Android, suele ser 10.0.2.2
-    // En web o iOS Simulator, localhost
-    // Para dispositivo físico o LAN, tu IP: 10.41.92.63
     if (Platform.OS === 'web') return 'http://localhost:3000/graphql';
     return 'http://10.41.92.63:3000/graphql'; 
 };
@@ -18,10 +14,8 @@ type RequestOptions = {
     token?: string | null | undefined;
 };
 
-// Función helper para fetch con timeout (evita carga infinita)
 const fetchWithTimeout = async (resource: string, options: RequestInit & { timeout?: number }) => {
     const { timeout = 10000 } = options;
-    
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), timeout);
     
@@ -33,21 +27,77 @@ const fetchWithTimeout = async (resource: string, options: RequestInit & { timeo
     return response;
 };
 
+let isRefreshing = false;
+let refreshPromise: Promise<string | null> | null = null;
+
+async function attemptRefresh() {
+    if (isRefreshing && refreshPromise) return refreshPromise;
+    isRefreshing = true;
+
+    refreshPromise = (async () => {
+        try {
+            const rt = await getRefreshToken();
+            if (!rt) throw new Error("No refresh token available");
+
+            const response = await fetchWithTimeout(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    query: `mutation RefreshToken($refreshToken: String!) {
+                        refreshToken(refreshToken: $refreshToken) {
+                            accessToken
+                            refreshToken
+                        }
+                    }`,
+                    variables: { refreshToken: rt }
+                })
+            });
+
+            const json = await response.json();
+            if (json.errors || !json.data?.refreshToken) {
+                throw new Error("Refresh failed in backend");
+            }
+
+            const { accessToken, refreshToken } = json.data.refreshToken;
+            await saveTokens(accessToken, refreshToken);
+            return accessToken;
+        } catch (error) {
+            await removeTokens();
+            return null;
+        } finally {
+            isRefreshing = false;
+            refreshPromise = null;
+        }
+    })();
+
+    return refreshPromise;
+}
+
 export async function apiFetch<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
     const { method = 'GET', body, token } = options;
-    const finalToken = token || await getAccessToken();
+    let finalToken = token || await getAccessToken();
 
-    const response = await fetchWithTimeout(`${API_URL}${endpoint}`, {
-        method,
-        headers: {
-            'Content-Type': 'application/json',
-            ...(finalToken ? { Authorization: `Bearer ${finalToken}` } : {})
-        },
-        body: body ? JSON.stringify(body) : undefined,
-    });
+    const doFetch = async (currentToken: string | null) => {
+        return fetchWithTimeout(`${API_URL}${endpoint}`, {
+            method,
+            headers: {
+                'Content-Type': 'application/json',
+                ...(currentToken ? { Authorization: `Bearer ${currentToken}` } : {})
+            },
+            body: body ? JSON.stringify(body) : undefined,
+        });
+    }
+
+    let response = await doFetch(finalToken);
+
+    if (response.status === 401) {
+        const newAccessToken = await attemptRefresh();
+        if (newAccessToken) {
+            response = await doFetch(newAccessToken);
+        }
+    }
 
     let data: unknown = null;
-
     const contentType = response.headers.get("Content-Type");
     if (contentType && contentType.includes("application/json")) {
         data = await response.json();
@@ -60,7 +110,6 @@ export async function apiFetch<T>(endpoint: string, options: RequestOptions = {}
             typeof data === "object" &&
             data !== null && 'message' in data &&
                 typeof (data as { message: string }).message === "string" ? (data as { message: string }).message : `Error HTTP ${response.status}`;
-        
         throw new Error(message);
     }
 
@@ -68,17 +117,35 @@ export async function apiFetch<T>(endpoint: string, options: RequestOptions = {}
 }
 
 export async function apiGraphQLFetch<T>(query: string, variables?: Record<string, unknown>, token?: string | null | undefined): Promise<T> {
-    const finalToken = token || await getAccessToken();
-    const response = await fetchWithTimeout(API_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            ...(finalToken ? { Authorization: `Bearer ${finalToken}` } : {})
-        },
-        body: JSON.stringify({ query, variables })
-    });
+    let finalToken = token || await getAccessToken();
 
-    const json = await response.json();
+    const doFetch = async (currentToken: string | null) => {
+        return fetchWithTimeout(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                ...(currentToken ? { Authorization: `Bearer ${currentToken}` } : {})
+            },
+            body: JSON.stringify({ query, variables })
+        });
+    }
+
+    let response = await doFetch(finalToken);
+    let json = await response.json();
+
+    const isUnauthorized = json.errors?.some((err: any) => 
+        err.message === 'Unauthorized' || err.extensions?.code === 'UNAUTHENTICATED'
+    ) || response.status === 401;
+
+    if (isUnauthorized) {
+        const newAccessToken = await attemptRefresh();
+        if (newAccessToken) {
+            response = await doFetch(newAccessToken);
+            json = await response.json();
+        } else {
+            // fallo el refresco, hacer algo xd
+        }
+    }
 
     if (json.errors?.length) {
         throw new Error(json.errors[0].message)

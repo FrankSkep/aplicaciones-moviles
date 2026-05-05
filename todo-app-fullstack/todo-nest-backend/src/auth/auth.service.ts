@@ -72,7 +72,7 @@ export class AuthService {
         secret: process.env.JWT_SECRET,
         expiresIn: '15m',
       });
-      return { accessToken: newAccessToken };
+      return { accessToken: newAccessToken, refreshToken };
     } catch (error) {
       throw new Error('Invalid refresh token');
     }
