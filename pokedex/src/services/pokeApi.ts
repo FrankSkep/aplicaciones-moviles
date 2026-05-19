@@ -1,4 +1,9 @@
-import type { PokemonDetail, PokemonListResponse } from '../types/pokemon';
+import type {
+  PokemonDetail,
+  PokemonListResponse,
+  PokemonTypeDetail,
+  PokemonTypeListResponse,
+} from '../types/pokemon';
 
 const BASE_URL = 'https://pokeapi.co/api/v2';
 
@@ -16,4 +21,12 @@ export async function fetchPokemonList(limit = 20, offset = 0): Promise<PokemonL
 
 export async function fetchPokemonDetail(nameOrId: string | number): Promise<PokemonDetail> {
   return fetchJson<PokemonDetail>(`${BASE_URL}/pokemon/${nameOrId}`);
+}
+
+export async function fetchPokemonTypes(): Promise<PokemonTypeListResponse> {
+  return fetchJson<PokemonTypeListResponse>(`${BASE_URL}/type`);
+}
+
+export async function fetchPokemonByType(typeName: string): Promise<PokemonTypeDetail> {
+  return fetchJson<PokemonTypeDetail>(`${BASE_URL}/type/${typeName}`);
 }

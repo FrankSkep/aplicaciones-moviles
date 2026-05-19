@@ -10,6 +10,20 @@ export interface PokemonListResponse {
   results: NamedApiResource[];
 }
 
+export interface PokemonTypeListResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: NamedApiResource[];
+}
+
+export interface PokemonTypeDetail {
+  pokemon: Array<{
+    pokemon: NamedApiResource;
+    slot: number;
+  }>;
+}
+
 export interface PokemonTypeSlot {
   slot: number;
   type: NamedApiResource;

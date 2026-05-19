@@ -6,9 +6,18 @@ type PokemonCardProps = {
   name: string;
   types: string[];
   onPress: () => void;
+  isFavorite?: boolean;
+  onToggleFavorite?: () => void;
 };
 
-export default function PokemonCard({ id, name, types, onPress }: PokemonCardProps) {
+export default function PokemonCard({
+  id,
+  name,
+  types,
+  onPress,
+  isFavorite = false,
+  onToggleFavorite,
+}: PokemonCardProps) {
   return (
     <Pressable onPress={onPress} style={styles.card}>
       <Image source={{ uri: getPokemonImageUrl(id) }} style={styles.image} />
@@ -23,6 +32,11 @@ export default function PokemonCard({ id, name, types, onPress }: PokemonCardPro
           ))}
         </View>
       </View>
+      {onToggleFavorite ? (
+        <Pressable onPress={onToggleFavorite} style={styles.favoriteButton}>
+          <Text style={styles.favoriteText}>{isFavorite ? 'Unfav' : 'Fav'}</Text>
+        </Pressable>
+      ) : null}
     </Pressable>
   );
 }
@@ -69,5 +83,16 @@ const styles = StyleSheet.create({
   typeText: {
     fontSize: 12,
     color: '#2b2b2b',
+  },
+  favoriteButton: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: '#1b1b1b',
+  },
+  favoriteText: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: '600',
   },
 });
